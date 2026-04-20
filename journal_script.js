@@ -152,13 +152,26 @@ function monthResult() {
   alert(result);  
 };
 function log() {
+  function time(){
+    let date = new Date();
+      let day = date.getDate();
+        if (day < 10) {day = '0' + day};
+      let month = date.getMonth()+1;
+        if (month < 10) {month = '0' + month};
+      let hours = date.getHours();
+        if (hours < 10) {hours = '0' + hours};
+      let min = date.getMinutes();
+        if (min < 10) {min = '0' + min};
+      let fullDate = `${day}.${month}_${hours}.${min}`;
+    return fullDate;
+  }
   let requests = fullData.requests.map(function(request){
     return JSON.stringify(request);
   }).join('\r\n');
   const blob = new Blob([requests], { type: 'text/plain' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `Список запросов.txt`;
+  link.download = `Function log, ${time()}.txt`;
   link.click();
   URL.revokeObjectURL(link.href);
   main();
@@ -228,7 +241,7 @@ document.getElementById('fileInput').addEventListener('change', function(e) {
   const reader = new FileReader();
   reader.onload = function(e) {
     const contents = e.target.result;
-    fullData = JSON.parse(contents);
+    fullData = JSON.parse(contents.replaceAll('\n', ' ').replaceAll('\r', ' '));
     main();
     //document.getElementById('fileContent').textContent = JSON.stringify(fullData, null, 2);
   };
