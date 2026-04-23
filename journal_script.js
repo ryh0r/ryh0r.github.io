@@ -1,27 +1,24 @@
 let fullData = {};
 let funcData = [];
-let functionArray = [addClass, addPayment, todayReport, curResult, monthResult, log, end];
+let functionArray = [addClass, addPayment, dailyReport, curResult, monthResult, log, end];
 
 function addClass() {
-  function arrayMaped(array) {
-  return array.map((item, index) => `
-  ${index} - ${item}`);
-  }
-  function today(){
-    let date = new Date();
-      let day = date.getDate();
-        if (day < 10) {day = '0' + day};
-      let month = date.getMonth()+1;
-        if (month < 10) {month = '0' + month};
-    return `${day}.${month}`;
-  }
+ 
   let curDate = prompt(`Какого числа было проведено занятие?`, `${today()}`);
   let bandNames = fullData.bands.map(band => band.name);
-  let bandIndex = +prompt(`Какой бэнд? ${arrayMaped(bandNames)}`, '3');
+ let bandIndex = +bandNames.itemSelect('Какой бэнд?');
+
   let curBand = bandNames[bandIndex];
   let studentsList = fullData.bands[bandIndex].students.map(student => student.name);
-  let curStudentsIndexes = prompt(`Кто присутствовал? ${arrayMaped(studentsList)}`, '0,2,4').split(',').map(elem => +elem);
-  let curStudents = curStudentsIndexes.map((item) => studentsList[+item] );
+  studentsList.push('были все');
+  let curStudentsIndexes = studentsList.itemSelect('Кто присутствовал?').split(',').map(elem => +elem);
+  let curStudents = [];
+  if (curStudentsIndexes[0] == studentsList.length-1) {
+    studentsList.pop();
+    curStudents = [...studentsList];
+  } else {
+    curStudents = curStudentsIndexes.map((item) => studentsList[+item] );
+  }
   let newClass = {date: [curDate], band: [curBand], students: [curStudents], cost: 40};
   if (curStudents.length == 3) {newClass.cost -= 5};
   if (curStudents.length > 4) {newClass.cost += 5};
@@ -45,24 +42,13 @@ function addClass() {
   else addClass();
 };
 function addPayment() {
-  function arrayMaped(array) {
-    return array.map((item, index) => `
-    ${index} - ${item}`);
-  }
-  function today(){
-    let date = new Date();
-      let day = date.getDate();
-        if (day < 10) {day = '0' + day};
-      let month = date.getMonth()+1;
-        if (month < 10) {month = '0' + month};
-    return `${day}.${month}`;
-  }
+  
   let curDate = prompt(`Когда оплатили?`, `${today()}`);
   let bandNames = fullData.bands.map(band => band.name);
-  let bandIndex = +prompt(`Какой бэнд? ${arrayMaped(bandNames)}`, '3');
+  let bandIndex = +bandNames.itemSelect('Какой бэнд?');
   let curBand = bandNames[bandIndex];
   let studentNames = fullData.bands[bandIndex].students.map(student => student.name);
-  let curStudentIndex = +prompt(`Кто оплатил? ${arrayMaped(studentNames)}`, '2');
+  let curStudentIndex = +studentNames.itemSelect('Кто оплатил?');
   let curStudent = studentNames[+curStudentIndex];
   let payment = +prompt('Сумма оплаты?', '100');
   let dataCheck = confirm(`Проверьте данные:
@@ -78,22 +64,18 @@ function addPayment() {
   }
   else addPayment();
 };
-function todayReport() {
-  let day = new Date().getDate();
-    if (day < 10) {day = '0' + day};
-  let month = new Date().getMonth()+1;
-    if (month < 10) {month = '0' + month};
-  let today = `${day}.${month}`;
-  let todayClasses = fullData.classes.filter(function(item) {return item.date == today});
-  let classeslist = todayClasses.map(function(item) { return ` 
+function dailyReport() {
+  let curDate = prompt(`За какое число нужен отчёт?`, `${today()}`);
+  let dailyClasses = fullData.classes.filter(function(item) {return item.date == curDate});
+  let classesList = dailyClasses.map(function(item) { return ` 
 ${item.band}
 * ${item.students};
 * ${item.cost}р
  `});
-  let todayPayments = fullData.payments.filter(function(item) {return item.date == today});
-  let paymentsList = todayPayments.map(item => `${item.student} ${item.value}`);
-  let result = `${today}
-${classeslist}
+  let dailyPayments = fullData.payments.filter(function(item) {return item.date == curDate});
+  let paymentsList = dailyPayments.map(item => `${item.student} ${item.value}`);
+  let result = `${curDate}
+${classesList}
 
 * Оплаты: ${paymentsList}`
   alert(result);
@@ -152,19 +134,6 @@ function monthResult() {
   alert(result);  
 };
 function log() {
-  function time(){
-    let date = new Date();
-      let day = date.getDate();
-        if (day < 10) {day = '0' + day};
-      let month = date.getMonth()+1;
-        if (month < 10) {month = '0' + month};
-      let hours = date.getHours();
-        if (hours < 10) {hours = '0' + hours};
-      let min = date.getMinutes();
-        if (min < 10) {min = '0' + min};
-      let fullDate = `${day}.${month}_${hours}.${min}`;
-    return fullDate;
-  }
   let requests = fullData.requests.map(function(request){
     return JSON.stringify(request);
   }).join('\r\n');
@@ -177,20 +146,7 @@ function log() {
   main();
 };
 function end() {
-  function time(){
-    let date = new Date();
-      let day = date.getDate();
-        if (day < 10) {day = '0' + day};
-      let month = date.getMonth()+1;
-        if (month < 10) {month = '0' + month};
-      let hours = date.getHours();
-        if (hours < 10) {hours = '0' + hours};
-      let min = date.getMinutes();
-        if (min < 10) {min = '0' + min};
-      let fullDate = `${day}.${month}_${hours}.${min}`;
-    return fullDate;
-  }
-  
+    
   let jsonData = JSON.stringify(fullData);
   const blob = new Blob([jsonData], { type: "application/json" });
 
@@ -225,7 +181,7 @@ function main() {
     let curFunc = prompt(`Какую функцию выполнить?
     0 - добавить занятие
     1 - добавить оплату
-    2 - отчёт за сегодня
+    2 - отчёт за день
     3 - текущий итог
     4 - итог за месяц
     5 - просмотр всех запросов
